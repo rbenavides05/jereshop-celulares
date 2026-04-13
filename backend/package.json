@@ -1,0 +1,14 @@
+{
+  "name": "jereshop-backend",
+  "version": "1.0.0",
+  "description": "Backend API y CMS para Jereshop",
+  "main": "src/app.js",
+  "scripts": {
+    "dev": "node src/app.js"
+  },
+  "author": "Jereshop",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
