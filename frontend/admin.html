@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jereshop Admin</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo">Jereshop Admin</h1>
+      <nav class="nav">
+        <a href="index.html">Ver sitio</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="products-section">
+    <div class="container">
+      <h2 class="section-title">Administrar productos</h2>
+
+      <form id="product-form" class="admin-form">
+        <input type="hidden" id="product-id" />
+        <input type="hidden" id="whatsapp_link" />
+
+        <div class="form-group">
+          <label for="name">Nombre del producto</label>
+          <input type="text" id="name" required />
+        </div>
+
+        <div class="form-group">
+          <label for="price">Precio actual</label>
+          <input type="number" id="price" step="0.01" required />
+        </div>
+
+        <div class="form-group">
+          <label for="original_price">Precio original</label>
+          <input type="number" id="original_price" step="0.01" />
+        </div>
+
+        <div class="form-group">
+          <label for="storage_select">Capacidad</label>
+          <select id="storage_select">
+            <option value="">Selecciona una capacidad</option>
+            <option value="64GB">64GB</option>
+            <option value="128GB">128GB</option>
+            <option value="256GB">256GB</option>
+            <option value="512GB">512GB</option>
+            <option value="1TB">1TB</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="storage_note">Detalle comercial</label>
+          <input
+            type="text"
+            id="storage_note"
+            placeholder="Ej: Nuevo, Semi nuevo, 90% batería"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="image_file">Foto del producto</label>
+          <input type="file" id="image_file" accept="image/*" />
+        </div>
+
+        <div class="form-group">
+          <label for="image_url">URL de imagen</label>
+          <input type="text" id="image_url" readonly />
+        </div>
+
+        <div class="form-group">
+          <label>WhatsApp del negocio</label>
+          <input
+            type="text"
+            value="Se genera automáticamente con el número del negocio"
+            readonly
+          />
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Guardar producto</button>
+          <button type="button" id="cancel-edit" class="btn-secondary">Cancelar</button>
+        </div>
+      </form>
+
+      <div id="admin-products" class="products-grid"></div>
+    </div>
+  </main>
+
+  <script src="admin.js"></script>
+</body>
+</html>
