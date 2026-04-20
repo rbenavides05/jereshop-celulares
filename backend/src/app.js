@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
+const https = require('https');
 
 const { initialize } = require('./db/connection');
 const productRoutes = require('./routes/products');
@@ -8,7 +10,7 @@ const uploadRoutes = require('./routes/upload');
 const authRoutes = require('./routes/auth');
 
 const app = express();
-const PORT = 3000;
+const PORT = 3001;
 const HOST = '0.0.0.0';
 
 // Inicializar base de datos
@@ -55,9 +57,15 @@ app.use((error, req, res, next) => {
   });
 });
 
-// Iniciar servidor
-app.listen(PORT, HOST, () => {
-  console.log(`Servidor corriendo en http://${HOST}:${PORT}`);
+// Certificados SSL autofirmados
+const sslOptions = {
+  key: fs.readFileSync(path.join(__dirname, '../../ssl/jereshop.key')),
+  cert: fs.readFileSync(path.join(__dirname, '../../ssl/jereshop.crt'))
+};
+
+// Iniciar servidor HTTPS
+https.createServer(sslOptions, app).listen(PORT, HOST, () => {
+  console.log(`Servidor HTTPS corriendo en https://localhost:${PORT}`);
   console.log('✅ Sitio público disponible en /');
   console.log('✅ Login admin disponible en /login');
   console.log('✅ Panel admin disponible en /admin');
