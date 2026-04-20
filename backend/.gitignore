@@ -1,0 +1,12 @@
+node_modules/
+.env
+uploads/
+*.key
+*.crt
+*.csr
+*.db
+.DS_Store
+dist/
+build/
+coverage/
+.vscode/

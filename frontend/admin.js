@@ -7,7 +7,7 @@ const IS_LOCAL =
   window.location.hostname === '127.0.0.1';
 
 const API_BASE = IS_LOCAL
-  ? 'http://localhost:3000'
+  ? 'http://localhost:3001'
   : window.location.origin;
 
 const API_URL = `${API_BASE}/api/products`;
