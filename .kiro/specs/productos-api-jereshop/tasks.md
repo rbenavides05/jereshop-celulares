@@ -90,8 +90,8 @@ Este plan implementa una API REST para gestionar productos de celulares con oper
     - Verificar que todas las respuestas tengan campo "error" y código HTTP apropiado
     - _Requirements: 8.1, 8.2, 9.5_
 
-- [~] 6. Implementar capa de controladores
-  - [~] 6.1 Crear controlador de productos
+- [ ] 6. Implementar capa de controladores
+  - [ ] 6.1 Crear controlador de productos
     - Implementar `controllers/productController.js` con: getAllProducts(), getProductById(), createProduct(), updateProduct(), deleteProduct()
     - Extraer parámetros de req (body, params)
     - Invocar servicios y formatear respuestas HTTP
@@ -107,27 +107,27 @@ Este plan implementa una API REST para gestionar productos de celulares con oper
     - Mock de servicios para aislar controladores
     - _Requirements: 1.5, 2.2, 3.2, 4.2, 5.2_
 
-- [~] 7. Implementar capa de rutas y configurar Express
-  - [~] 7.1 Crear rutas de productos
+- [ ] 7. Implementar capa de rutas y configurar Express
+  - [ ] 7.1 Crear rutas de productos
     - Implementar `routes/products.js` con endpoints: GET /api/products, GET /api/products/:id, POST /api/products, PUT /api/products/:id, DELETE /api/products/:id
     - Aplicar middleware de validación a cada ruta
     - Conectar rutas con controladores
     - _Requirements: 1.1, 2.1, 3.1, 4.1, 5.1_
   
-  - [~] 7.2 Actualizar app.js con configuración completa
+  - [ ] 7.2 Actualizar app.js con configuración completa
     - Configurar CORS middleware
     - Configurar express.json() para parsing de JSON
     - Montar rutas de productos en /api/products
     - Aplicar error handler global al final
     - _Requirements: 10.1, 10.2, 10.3_
   
-  - [~] 7.3 Crear server.js para inicialización
+  - [ ] 7.3 Crear server.js para inicialización
     - Separar inicialización de servidor de app.js
     - Inicializar base de datos antes de iniciar servidor
     - Manejar señales de cierre (SIGINT, SIGTERM) para cerrar DB
     - _Requirements: 6.2_
 
-- [~] 8. Implementar property tests de integración CRUD
+- [ ] 8. Implementar property tests de integración CRUD
   - [ ]* 8.1 Property test: Product Creation Round-Trip
     - **Property 1: Product Creation Round-Trip**
     - **Validates: Requirements 3.2, 3.3, 2.2**
@@ -221,7 +221,7 @@ Este plan implementa una API REST para gestionar productos de celulares con oper
     - Verificar que todos incluyan headers CORS apropiados
     - _Requirements: 10.3_
 
-- [~] 9. Implementar tests de integración end-to-end
+- [ ] 9. Implementar tests de integración end-to-end
   - [ ]* 9.1 Test de integración: Flujo completo CRUD
     - Iniciar servidor de test con base de datos en memoria
     - Crear producto → Listar productos → Obtener por ID → Actualizar → Eliminar
@@ -246,10 +246,10 @@ Este plan implementa una API REST para gestionar productos de celulares con oper
     - Verificar que retorne array vacío con status 200
     - _Requirements: 1.3_
 
-- [~] 10. Checkpoint final - Verificar implementación completa
+- [ ] 10. Checkpoint final - Verificar implementación completa
   - Ensure all tests pass, ask the user if questions arise.
 
-- [~] 11. Configurar scripts de testing en package.json
+- [ ] 11. Configurar scripts de testing en package.json
   - Agregar script "test" para ejecutar Jest
   - Agregar script "test:unit" para tests unitarios
   - Agregar script "test:properties" para property tests

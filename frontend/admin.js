@@ -1,6 +1,19 @@
-const API_URL = 'http://localhost:3000/api/products';
-const UPLOAD_URL = 'http://localhost:3000/api/upload';
+if (localStorage.getItem('jereshop_admin_auth') !== 'true') {
+  window.location.href = '/login';
+}
+
+const IS_LOCAL =
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1';
+
+const API_BASE = IS_LOCAL
+  ? 'http://localhost:3000'
+  : window.location.origin;
+
+const API_URL = `${API_BASE}/api/products`;
+const UPLOAD_URL = `${API_BASE}/api/upload`;
 const CLIENT_PHONE = '593983849782';
+const ADMIN_KEY = localStorage.getItem('jereshop_admin_key') || '';
 
 const form = document.getElementById('product-form');
 const productIdInput = document.getElementById('product-id');
@@ -9,11 +22,33 @@ const priceInput = document.getElementById('price');
 const originalPriceInput = document.getElementById('original_price');
 const storageSelectInput = document.getElementById('storage_select');
 const storageNoteInput = document.getElementById('storage_note');
+const statusInput = document.getElementById('status');
 const imageFileInput = document.getElementById('image_file');
 const imageUrlInput = document.getElementById('image_url');
 const whatsappLinkInput = document.getElementById('whatsapp_link');
 const cancelEditBtn = document.getElementById('cancel-edit');
 const adminProducts = document.getElementById('admin-products');
+const logoutBtn = document.getElementById('logout-btn');
+
+function getAdminHeaders(extra = {}) {
+  return {
+    'x-admin-key': ADMIN_KEY,
+    ...extra
+  };
+}
+
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', () => {
+    const confirmed = confirm('¿Deseas cerrar sesión?');
+    if (!confirmed) return;
+
+    localStorage.removeItem('jereshop_admin_auth');
+    localStorage.removeItem('jereshop_admin_email');
+    localStorage.removeItem('jereshop_admin_key');
+
+    window.location.href = '/login';
+  });
+}
 
 async function fetchProducts() {
   const response = await fetch(API_URL);
@@ -31,6 +66,7 @@ async function uploadImage(file) {
 
   const response = await fetch(UPLOAD_URL, {
     method: 'POST',
+    headers: getAdminHeaders(),
     body: formData
   });
 
@@ -53,7 +89,32 @@ function buildStorageValue() {
   const storageNote = storageNoteInput.value.trim();
 
   if (!storageValue) return null;
+
   return storageNote ? `${storageValue} - ${storageNote}` : storageValue;
+}
+
+function buildImageUrl(imagePath) {
+  if (!imagePath) return '';
+
+  if (imagePath.startsWith('http://localhost:3000')) {
+    return imagePath.replace('http://localhost:3000', API_BASE);
+  }
+
+  if (imagePath.startsWith('http://127.0.0.1:3000')) {
+    return imagePath.replace('http://127.0.0.1:3000', API_BASE);
+  }
+
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+
+  return `${API_BASE}${imagePath}`;
+}
+
+function getStatusBadge(status) {
+  return status === 'agotado'
+    ? '<span class="product-status-badge agotado">Agotado</span>'
+    : '<span class="product-status-badge disponible">Disponible</span>';
 }
 
 function resetForm() {
@@ -62,35 +123,49 @@ function resetForm() {
   imageUrlInput.value = '';
   storageSelectInput.value = '';
   storageNoteInput.value = '';
+  statusInput.value = 'disponible';
+
+  if (whatsappLinkInput) {
+    whatsappLinkInput.value = '';
+  }
 }
 
 async function renderProducts() {
   const products = await fetchProducts();
 
   if (products.length === 0) {
-    adminProducts.innerHTML = '<p class="empty-message">No hay productos registrados.</p>';
+    adminProducts.innerHTML = `
+      <p class="empty-message">No hay productos registrados.</p>
+    `;
     return;
   }
 
-  adminProducts.innerHTML = products.map(product => `
-    <article class="product-card">
-      <img src="${product.image_url}" alt="${product.name}">
-      <div class="product-info">
-        ${product.storage ? `<p class="product-storage">${product.storage}</p>` : ''}
-        <h3>${product.name}</h3>
+  adminProducts.innerHTML = products.map(product => {
+    const imageUrl = buildImageUrl(product.image_url);
+    const status = product.status || 'disponible';
 
-        <div class="product-prices">
-          ${product.original_price ? `<span class="old-price">$${Number(product.original_price).toFixed(2)}</span>` : ''}
-          <span class="product-price">$${Number(product.price).toFixed(2)}</span>
-        </div>
+    return `
+      <article class="product-card">
+        <img src="${imageUrl}" alt="${product.name}">
 
-        <div class="admin-card-actions">
-          <button class="edit-btn" onclick="editProduct(${product.id})">Editar</button>
-          <button class="delete-btn" onclick="deleteProduct(${product.id})">Eliminar</button>
+        <div class="product-info">
+          ${getStatusBadge(status)}
+          ${product.storage ? `<p class="product-storage">${product.storage}</p>` : ''}
+          <h3>${product.name}</h3>
+
+          <div class="product-prices">
+            ${product.original_price ? `<span class="old-price">$${Number(product.original_price).toFixed(2)}</span>` : ''}
+            <span class="product-price">$${Number(product.price).toFixed(2)}</span>
+          </div>
+
+          <div class="admin-card-actions">
+            <button class="edit-btn" onclick="editProduct(${product.id})">Editar</button>
+            <button class="delete-btn" onclick="deleteProduct(${product.id})">Eliminar</button>
+          </div>
         </div>
-      </div>
-    </article>
-  `).join('');
+      </article>
+    `;
+  }).join('');
 }
 
 form.addEventListener('submit', async (e) => {
@@ -105,6 +180,20 @@ form.addEventListener('submit', async (e) => {
     }
 
     const productName = nameInput.value.trim();
+    const productStatus = statusInput.value || 'disponible';
+
+    if (!productName) {
+      throw new Error('Debes ingresar el nombre del producto');
+    }
+
+    if (!priceInput.value) {
+      throw new Error('Debes ingresar el precio actual');
+    }
+
+    if (!imageUrl) {
+      throw new Error('Debes subir una imagen del producto');
+    }
+
     const whatsappLink = buildWhatsAppLink(productName);
     const fullStorage = buildStorageValue();
 
@@ -114,7 +203,8 @@ form.addEventListener('submit', async (e) => {
       original_price: originalPriceInput.value ? Number(originalPriceInput.value) : null,
       storage: fullStorage,
       image_url: imageUrl,
-      whatsapp_link: whatsappLink
+      whatsapp_link: whatsappLink,
+      status: productStatus
     };
 
     const id = productIdInput.value;
@@ -123,13 +213,17 @@ form.addEventListener('submit', async (e) => {
     if (id) {
       response = await fetch(`${API_URL}/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders({
+          'Content-Type': 'application/json'
+        }),
         body: JSON.stringify(payload)
       });
     } else {
       response = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders({
+          'Content-Type': 'application/json'
+        }),
         body: JSON.stringify(payload)
       });
     }
@@ -144,7 +238,7 @@ form.addEventListener('submit', async (e) => {
     resetForm();
     await renderProducts();
   } catch (error) {
-    alert(error.message);
+    alert(error.message || 'Ocurrió un error al guardar');
     console.error('Error al guardar producto:', error);
   }
 });
@@ -168,7 +262,11 @@ window.editProduct = async function(id) {
     priceInput.value = product.price;
     originalPriceInput.value = product.original_price || '';
     imageUrlInput.value = product.image_url;
-    whatsappLinkInput.value = product.whatsapp_link || '';
+    statusInput.value = product.status || 'disponible';
+
+    if (whatsappLinkInput) {
+      whatsappLinkInput.value = product.whatsapp_link || '';
+    }
 
     if (product.storage) {
       const parts = product.storage.split(' - ');
@@ -190,7 +288,8 @@ window.deleteProduct = async function(id) {
     if (!confirmed) return;
 
     const response = await fetch(`${API_URL}/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: getAdminHeaders()
     });
 
     const result = await response.json();

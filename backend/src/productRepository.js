@@ -22,18 +22,20 @@ function create(product) {
       original_price,
       storage,
       image_url,
-      whatsapp_link
+      whatsapp_link,
+      status
     )
-    VALUES (?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
 
   const result = stmt.run(
     product.name,
     product.price,
-    product.original_price,
-    product.storage,
+    product.original_price ?? null,
+    product.storage ?? null,
     product.image_url,
-    product.whatsapp_link
+    product.whatsapp_link,
+    product.status || 'disponible'
   );
 
   return findById(result.lastInsertRowid);
@@ -49,7 +51,8 @@ function update(id, product) {
 
   const updatedProduct = {
     ...existing,
-    ...product
+    ...product,
+    status: product.status || existing.status || 'disponible'
   };
 
   const stmt = db.prepare(`
@@ -59,17 +62,19 @@ function update(id, product) {
         original_price = ?,
         storage = ?,
         image_url = ?,
-        whatsapp_link = ?
+        whatsapp_link = ?,
+        status = ?
     WHERE id = ?
   `);
 
   stmt.run(
     updatedProduct.name,
     updatedProduct.price,
-    updatedProduct.original_price,
-    updatedProduct.storage,
+    updatedProduct.original_price ?? null,
+    updatedProduct.storage ?? null,
     updatedProduct.image_url,
     updatedProduct.whatsapp_link,
+    updatedProduct.status,
     id
   );
 

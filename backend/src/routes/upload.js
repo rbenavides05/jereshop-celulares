@@ -1,17 +1,10 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-
-console.log('✅ upload.js cargado');
+const { verifyAdminAuth } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// Ruta de prueba
-router.get('/test', (req, res) => {
-  res.json({ message: 'Ruta upload funcionando' });
-});
-
-// Configuración de almacenamiento
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, path.join(__dirname, '../../uploads'));
@@ -23,7 +16,6 @@ const storage = multer.diskStorage({
   }
 });
 
-// Filtro para aceptar solo imágenes
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image/')) {
     cb(null, true);
@@ -32,22 +24,18 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({
-  storage,
-  fileFilter
-});
+const upload = multer({ storage, fileFilter });
 
-// POST /api/upload
-router.post('/', upload.single('image'), (req, res) => {
+router.post('/', verifyAdminAuth, upload.single('image'), (req, res) => {
   if (!req.file) {
-    return res.status(400).json({ error: 'No se recibió ninguna imagen' });
+    return res.status(400).json({
+      error: 'No se recibió ninguna imagen'
+    });
   }
 
-  const imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
-
-  res.status(201).json({
+  res.json({
     message: 'Imagen subida correctamente',
-    image_url: imageUrl
+    image_url: `/uploads/${req.file.filename}`
   });
 });
 

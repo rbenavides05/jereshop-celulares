@@ -2,6 +2,18 @@ const productRepository = require('./productRepository');
 const { validateProduct } = require('./validators');
 
 /**
+ * Normaliza el estado del producto
+ */
+function normalizeStatus(status) {
+  if (!status) return 'disponible';
+
+  const normalized = String(status).trim().toLowerCase();
+
+  if (normalized === 'agotado') return 'agotado';
+  return 'disponible';
+}
+
+/**
  * Obtiene todos los productos
  */
 function getAllProducts() {
@@ -27,7 +39,12 @@ function getProductById(id) {
  * Crea un nuevo producto
  */
 function createProduct(data) {
-  const validation = validateProduct(data);
+  const payload = {
+    ...data,
+    status: normalizeStatus(data.status)
+  };
+
+  const validation = validateProduct(payload);
 
   if (!validation.valid) {
     const error = new Error(validation.errors.join(', '));
@@ -35,14 +52,19 @@ function createProduct(data) {
     throw error;
   }
 
-  return productRepository.create(data);
+  return productRepository.create(payload);
 }
 
 /**
  * Actualiza un producto existente
  */
 function updateProduct(id, data) {
-  const validation = validateProduct(data, true);
+  const payload = {
+    ...data,
+    status: normalizeStatus(data.status)
+  };
+
+  const validation = validateProduct(payload, true);
 
   if (!validation.valid) {
     const error = new Error(validation.errors.join(', '));
@@ -50,7 +72,7 @@ function updateProduct(id, data) {
     throw error;
   }
 
-  const updated = productRepository.update(id, data);
+  const updated = productRepository.update(id, payload);
 
   if (!updated) {
     const error = new Error('Producto no encontrado');
